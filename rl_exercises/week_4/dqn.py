@@ -134,7 +134,9 @@ class DQNAgent(AbstractAgent):
         # TODO: implement exponential‐decayin
         # ε = ε_final + (ε_start - ε_final) * exp(-total_steps / ε_decay)
         # Currently, it is constant and returns the starting value ε
-        eps = self.epsilon_final + (self.epsilon_start - self.epsilon_final) * np.exp(-self.total_steps / self.epsilon_decay)
+        eps = self.epsilon_final + (self.epsilon_start - self.epsilon_final) * np.exp(
+            -self.total_steps / self.epsilon_decay
+        )
         return eps
 
     def predict_action(
@@ -161,7 +163,7 @@ class DQNAgent(AbstractAgent):
         if evaluate:
             # TODO: select purely greedy action from Q(s)
             with torch.no_grad():
-                #qvals = ...  # noqa: F841
+                # qvals = ...  # noqa: F841
                 state_tensor = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
                 qvals = self.q(state_tensor)
 
@@ -234,7 +236,7 @@ class DQNAgent(AbstractAgent):
 
         # # TODO: pass batched states through self.q and gather Q(s,a)
         qvals = self.q(s)
-        pred = qvals.squeeze() #qvals.gather(1, a)
+        pred = qvals.squeeze()  # qvals.gather(1, a)
 
         # TODO: compute TD target with frozen network
         with torch.no_grad():
@@ -309,7 +311,8 @@ def main(cfg: DictConfig):
 
     # 3) TODO: instantiate & train the agent
     agent = DQNAgent(
-        env, buffer_capacity=cfg.agent.buffer_capacity,
+        env,
+        buffer_capacity=cfg.agent.buffer_capacity,
         batch_size=cfg.agent.batch_size,
         lr=cfg.agent.learning_rate,
         gamma=cfg.agent.gamma,
@@ -317,10 +320,11 @@ def main(cfg: DictConfig):
         epsilon_final=cfg.agent.epsilon_final,
         epsilon_decay=cfg.agent.epsilon_decay,
         target_update_freq=cfg.agent.target_update_freq,
-        seed=cfg.seed
+        seed=cfg.seed,
     )
-    
+
     agent.train(num_frames=cfg.agent.num_frames, eval_interval=cfg.train.eval_interval)
+
 
 if __name__ == "__main__":
     main()
