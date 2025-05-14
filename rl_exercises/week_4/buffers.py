@@ -57,6 +57,7 @@ class ReplayBuffer(AbstractBuffer):
         info : dict
             Gym info dict (can store extras).
         """
+
         if len(self.states) >= self.capacity:
             # # TODO: pop the oldest element off each list (states, actions, …, infos)
             self.states.pop(0)
@@ -65,7 +66,6 @@ class ReplayBuffer(AbstractBuffer):
             self.next_states.pop(0)
             self.dones.pop(0)
             self.infos.pop(0)
-            return
 
         # TODO: append state, action, reward, next_state, done, info to their respective lists
         self.states.append(state)
@@ -93,7 +93,6 @@ class ReplayBuffer(AbstractBuffer):
         List of transitions as (state, action, reward, next_state, done, info).
         """
         # TODO: randomly choose `batch_size` unique indices from [0, len(self.states))
-
         idxs = np.random.choice(len(self.states), size=batch_size, replace=False)
 
         return [

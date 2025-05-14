@@ -169,7 +169,7 @@ class DQNAgent(AbstractAgent):
         else:
             if np.random.rand() < self.epsilon():
                 # TODO: sample random action
-                self.env.action_space.sample()
+                action = self.env.action_space.sample()
             else:
                 # TODO: select purely greedy action from Q(s)
                 state_tensor = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
