@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Tuple
 
 import gymnasium as gym
 import hydra
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torch.nn as nn
@@ -178,7 +179,7 @@ class DQNAgent(AbstractAgent):
                 qvals = self.q(state_tensor)
                 action = int(torch.argmax(qvals, dim=1).item())
 
-        return action
+        return action  # , {}
 
     def save(self, path: str) -> None:
         """
@@ -236,7 +237,7 @@ class DQNAgent(AbstractAgent):
 
         # # TODO: pass batched states through self.q and gather Q(s,a)
         qvals = self.q(s)
-        pred = qvals.squeeze()  # qvals.gather(1, a)
+        pred = qvals.gather(1, a)  # pred = qvals#.squeeze()  # qvals.gather(1, a)
 
         # TODO: compute TD target with frozen network
         with torch.no_grad():
@@ -272,6 +273,7 @@ class DQNAgent(AbstractAgent):
         state, _ = self.env.reset()
         ep_reward = 0.0
         recent_rewards: List[float] = []
+        frames: List[int] = []
 
         for frame in range(1, num_frames + 1):
             action = self.predict_action(state)
@@ -291,6 +293,7 @@ class DQNAgent(AbstractAgent):
             if done or truncated:
                 state, _ = self.env.reset()
                 recent_rewards.append(ep_reward)
+                frames.append(frame)
                 ep_reward = 0.0
                 # logging
                 if len(recent_rewards) % 10 == 0:
@@ -301,6 +304,16 @@ class DQNAgent(AbstractAgent):
                     )
 
         print("Training complete.")
+
+        plt.figure()
+        plt.plot(frames, recent_rewards, linestyle="-", label="Reward")
+        plt.xlabel("Frame")
+        plt.ylabel("Reward")
+        plt.title("Reward over Time (Frames)")
+        plt.legend()
+        plt.grid(True)
+        plt.tight_layout()
+        plt.show()
 
 
 @hydra.main(config_path="../configs/agent/", config_name="dqn", version_base="1.1")
@@ -323,7 +336,7 @@ def main(cfg: DictConfig):
         seed=cfg.seed,
     )
 
-    agent.train(num_frames=cfg.agent.num_frames, eval_interval=cfg.train.eval_interval)
+    agent.train(num_frames=cfg.train.num_frames, eval_interval=cfg.train.eval_interval)
 
 
 if __name__ == "__main__":
